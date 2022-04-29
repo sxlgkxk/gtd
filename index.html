@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<!-- http-server -p 8001 -c-1 -->
+
+<head>
+	<title>gtd</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+	<div id="timer">
+		<br>
+		<span class="span1" id="timerContent">content</span>
+		<progress id="timerValue" max="100" value="70"></progress>
+		<span class="span2" id="timerTime">03:42</span>
+	</div>
+
+	<pre id="textarea" readonly></pre>
+	<pre id="day" readonly>hi</pre>
+	<button id="dayBtn" onclick="toggleDay()">day</button>
+
+	<style>
+		#dayBtn{
+			font-weight: bold;
+			color: #fff;
+			background-color: #333;
+			position: fixed;
+			width: 100px;
+			height: 100px;
+			opacity: 0.8;
+			z-index: 1000;
+			bottom: 0;
+			right: 0;
+		}
+
+		#textarea , #day {
+			width: 100%;
+			height: 600px;
+			border: none;
+			resize: none;
+			font-size: 24px;
+			margin-left: 10px;
+		}
+
+		body,
+		#textarea, #day{
+			background-color: #000000;
+			color: #ffffff;
+		}
+
+		pre {
+			overflow-x: auto;
+			white-space: pre-wrap;
+			white-space: -moz-pre-wrap;
+			white-space: -pre-wrap;
+			white-space: -o-pre-wrap;
+			/* word-wrap: break-word; */
+			word-break: break-all;
+		}
+
+		progress {
+			background-color: #f3f3f3;
+			border: 0;
+			height: 18px;
+			border-radius: 9px;
+			width: 95%;
+		}
+
+		::-webkit-progress-value {
+			background-color: rgb(80, 255, 86);
+		}
+
+		::-moz-progress-bar {
+			background-color: rgb(80, 255, 86);
+		}
+
+		#day{
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			display: none;
+			background-color: rgb(12, 71, 45);
+		}
+
+		div#timer{
+			position: fixed;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			background-color: rgba(0, 0, 0, 1);
+		}
+		div#timer .span1{
+			font-size: 32px;
+			color: rgb(80, 255, 86);
+		}
+		div#timer .span2{
+			font-size: 30px;
+		}
+	</style>
+	<script>
+		function toggleDay(){
+			var day = document.getElementById('day');
+			day.style.display = day.style.display == 'none' ? 'block' : 'none';
+		}
+		function updateText() {
+			// timer
+			filename = "content.json"
+			axios.get('/' + filename).then(function (response) {
+				content = response.data;
+				timerContent=content.timer.content;
+				if(timerContent){
+					document.querySelector('#timer').style.display = 'block';
+					seconds_delta = (new Date().getTime() -content.timer.created)/1000;
+					seconds_remain=5*60-seconds_delta;
+					timerValue=seconds_remain/(5*60)*100;
+					if(timerValue>=0)
+						timerTime=Math.floor(seconds_remain/60)+":"+("0"+Math.floor(seconds_remain%60)).slice(-2);
+					else
+						timerTime="0:0";
+					console.log(seconds_delta)
+					document.getElementById("timerContent").innerHTML=timerContent;
+					document.getElementById("timerValue").value=timerValue;
+					document.getElementById("timerTime").innerHTML=timerTime;
+
+					if (timerValue<=0)
+						document.querySelector('#timer').style.backgroundColor = 'rgba(255, 0, 0, 1)';
+					else
+						document.querySelector('#timer').style.backgroundColor = 'rgba(0, 0, 0, 1)';
+
+				}else{
+					document.querySelector('#timer').style.display = 'none';
+				}
+
+				// textarea
+				filename = "content.txt"
+				axios.get('/' + filename).then(function (response) {
+					content = response.data;
+					document.getElementById('textarea').innerHTML = content;
+
+					cur_hour = new Date().getHours();
+					if (!content.includes(cur_hour + ":")) {
+						document.getElementById('textarea').style.backgroundColor = "#ff0000";
+					} else {
+						document.getElementById('textarea').style.backgroundColor = "#000000";
+					}
+					whitelist = [11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
+					if (whitelist.includes(cur_hour)) {
+						document.getElementById('textarea').style.color = "#ffffff";
+					} else {
+						document.getElementById('textarea').style.color = "#000000";
+					}
+				});
+
+				// day
+				filename = "day.txt"
+				axios.get('/' + filename).then(function (response) {
+					content = response.data;
+					document.getElementById('day').innerHTML = content;
+				});
+			});
+		}
+		setInterval(updateText, 1000 * 10);
+		updateText()
+	</script>
+	<!-- <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+	<script>
+		var vConsole = new window.VConsole({ theme: 'dark' });
+	</script> -->
+</body>
+
+</html>
