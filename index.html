@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>gtd</title>
 	<meta charset="utf-8">
@@ -12,18 +13,18 @@
 	<pre id="textarea" readonly></pre>
 
 	<style>
-		#textarea{
+		#textarea {
 			width: 100%;
 			height: 600px;
 			border: none;
 			resize: none;
-			font-size: 24px;
-			margin-left: 10px;
+			font-size: 22px;
+			margin-left: 5px;
 			margin-top: 0px;
 		}
 
 		body,
-		#textarea{
+		#textarea {
 			background-color: #000000;
 			color: #ffffff;
 		}
@@ -37,34 +38,55 @@
 			/* word-wrap: break-word; */
 			word-break: break-all;
 		}
-		strong{
+
+		strong {
 			color: #37a2da
 		}
-		code{
-			color:#ff0080;
+
+		code {
+			color: #ff0080;
 			background: none;
 			font-weight: bold;
 		}
-	</style>
-	<script>
-		function updateText() {
-			filename = "content.md"
-			axios.get('/' + filename).then(function (response) {
-				content = response.data;
-				document.getElementById('textarea').innerHTML = marked.parse(content);
 
-				cur_hour = new Date().getHours();
-				// regex check
-				if(content.match(new RegExp(`\n${cur_hour}[ ]{0,1}:`))){
-					document.getElementById('textarea').style.backgroundColor = "#000000";
-				} else {
-					document.getElementById('textarea').style.backgroundColor = "#ff0000";
-				}
-			});
+		p,
+		ul,
+		ol,
+		li {
+			margin: 0px;
+			padding: 0px;
 		}
+	</style>
+	<script type="module">
+		let content = '';
+		function connect() {
+			let ws = new WebSocket(`ws://${location.hostname}:7071/ws`);
+			ws.onmessage = (webSocketMessage) => {
+				console.log('onmessage called');
+				const messageBody = JSON.parse(webSocketMessage.data);
+				content = messageBody.data;
+				document.getElementById('textarea').innerHTML = marked.parse(content);
+			};
+			ws.onclose = function (e) {
+				console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+				setTimeout(function () {
+					connect();
+				}, 1000);
+			};
+		}
+		connect();
 
-		setInterval(updateText, 1000 * 5);
-		updateText()
+		function check() {
+			let cur_hour = new Date().getHours();
+			// regex check
+			if (content.match(new RegExp(`\n${cur_hour}[ ]{0,1}:`))) {
+				document.getElementById('textarea').style.backgroundColor = "#000000";
+			} else {
+				document.getElementById('textarea').style.backgroundColor = "#ff0000";
+			}
+		}
+		setInterval(check, 1000);
+
 	</script>
 </body>
 
