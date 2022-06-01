@@ -13,19 +13,27 @@
 	<pre id="textarea" readonly></pre>
 
 	<style>
+		body,
+		html {
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			background-color: black;
+		}
+
 		#textarea {
 			width: 100%;
-			height: 600px;
+			/* height: 600px; */
+			height: 100%;
 			border: none;
 			resize: none;
 			font-size: 22px;
-			margin-left: 5px;
+			margin-left: 0px;
 			margin-top: 0px;
 		}
 
 		body,
 		#textarea {
-			background-color: #000000;
 			color: #ffffff;
 		}
 
@@ -39,7 +47,8 @@
 			word-break: break-all;
 		}
 
-		strong, b {
+		strong,
+		b {
 			color: #37a2da
 		}
 
@@ -48,7 +57,8 @@
 			background: none;
 			font-weight: bold;
 		}
-		blockquote{
+
+		blockquote {
 			margin-left: 10px;
 			margin-right: 0px;
 			margin-top: 0px;
@@ -72,7 +82,7 @@
 				const messageBody = JSON.parse(webSocketMessage.data);
 				content = messageBody.data;
 				let cur_hour = new Date().getHours();
-				let html=marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
+				let html = marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
 				document.getElementById('textarea').innerHTML = html;
 			};
 			ws.onclose = function (e) {
@@ -87,14 +97,27 @@
 		function check() {
 			let cur_hour = new Date().getHours();
 			if (content.match(new RegExp(`\n${cur_hour}[ ]{0,1}:`))) {
-				document.getElementById('textarea').style.backgroundColor = "#000000";
+				let degree = new Date().getMinutes() / 60 * 100;
+				document.getElementById('textarea').style.background = `linear-gradient(to bottom, black ${degree}%, #197b2c ${degree}%)`;
 			} else {
-				document.getElementById('textarea').style.backgroundColor = "#ff0000";
+				document.getElementById('textarea').style.background = "#ff0000";
 			}
-			let html=marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
+			let html = marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
 			document.getElementById('textarea').innerHTML = html;
 		}
 		setInterval(check, 1000);
+
+		var elem = document.getElementById("textarea");
+		elem.onclick = toggleFullScreen;
+		function toggleFullScreen() {
+			if (!document.fullscreenElement) {
+				document.documentElement.requestFullscreen();
+			} else {
+				if (document.exitFullscreen) {
+					document.exitFullscreen();
+				}
+			}
+		}
 
 	</script>
 </body>
