@@ -82,7 +82,7 @@
 				const messageBody = JSON.parse(webSocketMessage.data);
 				content = messageBody.data;
 				let cur_hour = new Date().getHours();
-				let html = marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
+				let html = marked.parse(content)
 				document.getElementById('textarea').innerHTML = html;
 			};
 			ws.onclose = function (e) {
@@ -96,14 +96,37 @@
 
 		function check() {
 			let cur_hour = new Date().getHours();
-			if (content.match(new RegExp(`\n${cur_hour}[ ]{0,1}:`))) {
-				let degree = new Date().getMinutes() / 60 * 100;
-				document.getElementById('textarea').style.background = `linear-gradient(to bottom, black ${degree}%, #197b2c ${degree}%)`;
-			} else {
-				document.getElementById('textarea').style.background = "#ff0000";
+			let todayContent=content.substr(0, content.search(/明日:/));
+
+			// ddl方案
+			let lines=todayContent.split('\n');
+			let pre_hour=0;
+			for(let i=lines.length-1;i>=0;i--){
+				let line=lines[i];
+				let hour=line.match(/^(\d+):/);
+				hour=hour?hour[1]:null;
+				if(hour){
+					if(hour>cur_hour){
+						let degree =100-((hour-cur_hour)*60- new Date().getMinutes())/((hour-pre_hour)*60) * 100;
+						document.getElementById('textarea').style.background = `linear-gradient(to bottom, black ${degree}%, #197b2c ${degree}%)`;
+						let html = marked.parse(content.replace(new RegExp(`\n(${hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
+						document.getElementById('textarea').innerHTML = html;
+						break;
+					}else{
+						pre_hour=hour;
+					}
+				}
 			}
-			let html = marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
-			document.getElementById('textarea').innerHTML = html;
+
+			// 之前普通的小时计划
+			// if (content.match(new RegExp(`\n${cur_hour}[ ]{0,1}:`))) {
+			// 	let degree = new Date().getMinutes() / 60 * 100;
+			// 	document.getElementById('textarea').style.background = `linear-gradient(to bottom, black ${degree}%, #197b2c ${degree}%)`;
+			// } else {
+			// 	document.getElementById('textarea').style.background = "#ff0000";
+			// }
+			// let html = marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
+			// document.getElementById('textarea').innerHTML = html;
 		}
 		setInterval(check, 1000);
 
