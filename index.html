@@ -87,6 +87,7 @@
 			};
 			ws.onclose = function (e) {
 				console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+				document.getElementById('textarea').style.background = `#f00`;
 				setTimeout(function () {
 					connect();
 				}, 1000);
@@ -95,8 +96,17 @@
 		connect();
 
 		function check() {
-			let cur_hour = new Date().getHours();
-			let todayContent=content.substr(0, content.search(/明日:/));
+			let today=new Date();
+			let cur_hour = today.getHours();
+			let cur_date=`${today.getMonth()+1}月${today.getDate()}`;
+			let todayContent;
+			if(content.search(new RegExp(`${cur_date}:`))!=-1){
+				todayContent=content.substr(content.search(new RegExp(`${cur_date}:`)), content.search(/\n---/));
+			}else{
+				document.getElementById('textarea').style.background = `#f00`;
+				return
+			}
+			
 
 			// ddl方案
 			let lines=todayContent.split('\n');
@@ -107,7 +117,7 @@
 				hour=hour?hour[1]:null;
 				if(hour){
 					if(hour>cur_hour){
-						let degree =100-((hour-cur_hour)*60- new Date().getMinutes())/((hour-pre_hour)*60) * 100;
+						let degree =100-((hour-cur_hour)*60- today.getMinutes())/((hour-pre_hour)*60) * 100;
 						document.getElementById('textarea').style.background = `linear-gradient(to bottom, black ${degree}%, #197b2c ${degree}%)`;
 						let html = marked.parse(content.replace(new RegExp(`\n(${hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
 						document.getElementById('textarea').innerHTML = html;
@@ -117,16 +127,6 @@
 					}
 				}
 			}
-
-			// 之前普通的小时计划
-			// if (content.match(new RegExp(`\n${cur_hour}[ ]{0,1}:`))) {
-			// 	let degree = new Date().getMinutes() / 60 * 100;
-			// 	document.getElementById('textarea').style.background = `linear-gradient(to bottom, black ${degree}%, #197b2c ${degree}%)`;
-			// } else {
-			// 	document.getElementById('textarea').style.background = "#ff0000";
-			// }
-			// let html = marked.parse(content.replace(new RegExp(`\n(${cur_hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
-			// document.getElementById('textarea').innerHTML = html;
 		}
 		setInterval(check, 1000);
 
