@@ -1,23 +1,15 @@
 
-6月20:
-
-24: 逛三园设计/调试
-- [x] sls框架收尾完工
-- [ ] getActiveTriggerResult
-- [ ] getRetryResult
-- [ ] getNextRoundResult
+6月22:
 
 24: break
 
-19: 逛三园设计/调试
-- [x] getAnswerReplys
-- [x] apk开发
-- [x] 全命令行生活
-
 19: break: 饭
 
-14: 逛三园设计/调试
-- [x] 跑ut/经常跑
+14: 逛三园+个人项目
+- [ ] 逛三园*3h*
+    - [ ] `不同人行为概率不同`(0.5h)
+- [ ] 个人项目(1h)
+    - [ ] privateTag实用化
 
 14: break: 饭+睡
 
@@ -25,12 +17,21 @@
 
 ---
 
-6月21:
+6月23:
 
+24: break
 
+19: break: 饭
+
+14: break: 饭+睡
+
+9: start
 
 <!--
 
+数据上云(wiki/ddl)
+3d
+gallery, history, privateTag编辑
 
 
 24: break
@@ -41,8 +42,5 @@
 
 9: start
 
-sls
-wiki
-3d
 
 -->
