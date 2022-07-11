@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 var fs = require('fs');
-const wss = new WebSocket.Server({ port: 7073 });
+const wss = new WebSocket.Server({ port: 7071 });
 
 const clients = new Map();
 

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>mindmap</title>
+	<title>gtd</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<script src="/axios.min.js"></script>
@@ -16,34 +16,28 @@
 	<style>
 		body,
 		html {
-			height: calc(100%-2px);
+			height: 100%;
 			margin: 0;
 			padding: 0;
 			background-color: black;
 		}
 
 		#textarea {
-			/* width: 100%; */
-			/* height: 100%; */
+			width: 100%;
+			height: 100%;
 			border: none;
 			resize: none;
-			font-size: 12px;
+			font-size: 22px;
 			margin-left: 0px;
 			margin-top: 0px;
 			line-height: 1.5;
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			width:600px;
 		}
-
 
 		body,
 		#textarea {
 			color: #ffffff;
 			word-break: break-all;
-			border-top: 1px solid rgba(0, 0, 0, 1);
+			border-top: 1px solid rgba(0,0,0,1);
 		}
 
 		em {
@@ -51,12 +45,11 @@
 			font-style: normal;
 			font-weight: bold;
 			background-color: #666;
-			font-size: 8px;
+			font-size: 16px;
 			padding-left: 5px;
 			padding-right: 5px;
 			margin-left: 3px;
 		}
-
 		strong,
 		b {
 			color: #37a2da
@@ -70,8 +63,8 @@
 
 		ul,
 		ol {
-			/* border: 1px solid #37a2da; */
-			background: rgba(55, 162, 218, 0.2);
+			border: 1px solid #37a2da;
+			background: rgba(55, 162, 218, 0.5);
 			margin: 0px;
 		}
 
@@ -104,7 +97,7 @@
 
 		let content = '';
 		function connect() {
-			let ws = new WebSocket(`ws://${location.hostname}:7073/ws`);
+			let ws = new WebSocket(`ws://${location.hostname}:7071/ws`);
 			ws.onmessage = (webSocketMessage) => {
 				console.log('onmessage called');
 				const messageBody = JSON.parse(webSocketMessage.data);
@@ -122,6 +115,54 @@
 			};
 		}
 		connect();
+
+		function check() {
+			let today = new Date();
+			let cur_hour = today.getHours();
+			let cur_date = `${today.getMonth() + 1}月${today.getDate()}`;
+			let todayContent;
+			if (content.search(new RegExp(`${cur_date}:`)) != -1) {
+				todayContent = content.substr(content.search(new RegExp(`${cur_date}:`)), content.search(/\n---/));
+			} else {
+				document.getElementById('textarea').style.background = `#f00`;
+				return
+			}
+
+
+			// ddl方案
+			let lines = todayContent.split('\n');
+			let pre_hour = 0;
+			for (let i = lines.length - 1; i >= 0; i--) {
+				let line = lines[i];
+				let hour = line.match(/^(\d+):/);
+				hour = hour ? hour[1] : null;
+				if (hour) {
+					if (hour > cur_hour) {
+						let degree = 100 - ((hour - cur_hour) * 60 - today.getMinutes()) / ((hour - pre_hour) * 60) * 100;
+						document.getElementById('textarea').style.background = `linear-gradient(to bottom, black ${degree}%, #197b2c ${degree}%)`;
+						let html = marked.parse(content.replace(new RegExp(`\n(${hour}[ ]{0,1}:.*?)\r`), '\n<b>$1</b>\r'))
+						document.getElementById('textarea').innerHTML = html;
+						break;
+					} else {
+						pre_hour = hour;
+					}
+				}
+			}
+		}
+		// setInterval(check, 1000 * 10000);
+		setInterval(check, 1000);
+
+		var elem = document.getElementById("textarea");
+		elem.onclick = toggleFullScreen;
+		function toggleFullScreen() {
+			if (!document.fullscreenElement) {
+				document.documentElement.requestFullscreen();
+			} else {
+				if (document.exitFullscreen) {
+					document.exitFullscreen();
+				}
+			}
+		}
 
 	</script>
 </body>
